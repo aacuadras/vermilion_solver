@@ -1,5 +1,6 @@
 #CSCI 4352 Team 4
-#Emtpy file to write the environment 
+#Emtpy file to write the environment
+#TODO: Make sure that there is only one 1 
 import numpy as np
 
 def validMatrix(grid) ->bool:
