@@ -38,22 +38,55 @@ def probability(arr) ->float:
     
     return count / len(arr)
 
-#Markov chain driver
 
+'''Markov chain driver'''
 tran_matrix = [
     [.7, .3],
     [.2, .8]
 ]
 
+null_tran_matrix = [
+    [0, 1],
+    [1, 0]
+]
+
+#Create a markov chain for every trashcan
+markov_matrix = [[None, None, None, None, None],[None, None, None, None, None],[None, None, None, None, None]]
+for i in range(3):
+    for j in range(5):
+        if(i % 2 == j % 2):
+            markov_matrix[i][j] = MarkovChain(tran_matrix, states=[1, 0])
+        else:
+            markov_matrix[i][j] = MarkovChain(null_tran_matrix, states=[1, 0])
+
+#Generate environment
+grid = env.Environment()
+
+#Train the matrix 50 times
+for count in range(100000):
+    for i in range(3):
+        for j in range(5):
+            markov_matrix[i][j].next_state(grid.getGrid()[i][j])
+    grid = env.Environment()
+
+for i in range(3):
+    for j in range(5):
+        print("Index (%d, %d): "%(i, j), end="")
+        states = markov_matrix[i][j].generate_states(grid.getGrid()[i][j])
+        print(states)
+        print("     Probability: %f\n"%probability(states))
+
+
+'''
 #Generate markov chain
 switch_chain = MarkovChain(tran_matrix, states=[0, 1])
 #Generate environment
 g = env.Environment()
 
 #observe first cell 50 times and output the states
-for i in range(50):
-    print("State " + str(i) + ": " + str(switch_chain.next_state(g.getGrid()[0][0])))
-    time.sleep(0.5)
+for i in range(10000):
+    print("State " + str(i) + ": " + str(switch_chain.next_state(g.getGrid()[1][0])))
+    #time.sleep(0.005)
     g = env.Environment()
 
 #generate states
@@ -62,4 +95,5 @@ for i in range(50):
 stts = switch_chain.generate_states(g.getGrid()[0][0])
 print(stts)
 print("Probability: " + str(probability(stts)))
+'''
     
