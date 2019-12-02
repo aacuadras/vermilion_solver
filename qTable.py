@@ -18,6 +18,21 @@ def generateFIND_STATE():
     
     return (row, column)
 
+def printMatrix(x, y):
+    print("o-o-o-o-o-o")
+    for i in range(3):
+        print("|", end="")
+        for j in range(5):
+            if (i == x and j == y):
+                print("O", end="")
+            elif (i == FIND_STATE[0] and j == FIND_STATE[1]):
+                print("X", end="")
+            else:
+                print(" ", end="")
+            print("|", end="")
+        print("\no-o-o-o-o-o")
+
+
 
 #Environment variables for agent
 BOARD_ROWS = 3
@@ -156,8 +171,6 @@ class Agent:
         i = 0
         while i < rounds:
             # to the end of game back propagate reward
-            if(i == rounds / 2):
-                FIND_STATE = generateFIND_STATE()
             if self.State.isEnd:
                 # back propagate
                 reward = self.State.giveReward()    #coordinate where switch is located
@@ -180,8 +193,9 @@ class Agent:
                 # mark is end
                 self.State.isEndFunc()
                 print("nxt state", self.State.state)
+                printMatrix(self.State.state[0], self.State.state[1])
                 print("---------------------")
-                time.sleep(.25)
+                time.sleep(0.25)
                 self.isEnd = self.State.isEnd
 
 if __name__ == "__main__":
@@ -189,7 +203,7 @@ if __name__ == "__main__":
     print("initial Q-values ... \n")
     print(ag.Q_values)
 
-    ag.play(50)
+    ag.play(100)
     print("latest Q-values ... \n")
     for key in ag.Q_values:
         print(key)

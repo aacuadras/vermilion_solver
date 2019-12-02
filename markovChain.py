@@ -1,7 +1,69 @@
 #Markov Chain workspace
-import env as env
+#import env as env
 import numpy as np
 import time
+
+def validCoord(row, column) ->bool:
+    if(row % 2 == column % 2):
+        return True
+    else:
+        return False
+
+def generateFIND_STATE():
+    column = int(np.random.randint(0, high=5, size=1))
+    row = int(np.random.randint(0, high=3, size=1))
+    while(not validCoord(row, column)):
+        column = int(np.random.randint(0, high=5, size=1))
+        row = int(np.random.randint(0, high=3, size=1))
+    
+    return (row, column)
+
+BOARD_ROWS = 3
+BOARD_COLS = 5
+FIND_STATE = generateFIND_STATE()
+START = (0, 0)
+
+class Environment:
+    def __init__(self, state=START):
+        self.board = np.zeros([BOARD_ROWS, BOARD_COLS])
+        self.state = state
+        self.isEnd = False
+
+    def isEndFunc(self):
+        if (self.state == FIND_STATE):
+            self.isEnd = True
+
+    def move(self, action):
+        if action == "up":
+            nxtState = (self.state[0] - 1, self.state[1])
+        elif action == "down":
+            nxtState = (self.state[0] + 1, self.state[1])
+        elif action == "left":
+            nxtState = (self.state[0], self.state[1] - 1)
+        elif action == "right":
+            nxtState = (self.state[0], self.state[1] + 1)
+
+        if (nxtState[0] >= 0) and (nxtState[0] <= 2):
+            if (nxtState[1] >= 0) and (nxtState[1] <= 4):
+                self.isEndFunc()
+                self.state = nxtState
+                return nxtState
+        return self.state
+
+    def printMatrix(self):
+        print("o-o-o-o-o-o")
+        for i in range(3):
+            print("|", end="")
+            for j in range(5):
+                if (i == self.state[0] and j == self.state[1]):
+                    print("O", end="")
+                elif (i == FIND_STATE[0] and j == FIND_STATE[1]):
+                    print("X", end="")
+                else:
+                    print(" ", end="")
+                print("|", end="")
+            print("\no-o-o-o-o-o")
+
 
 class MarkovChain:
     def __init__(self, transition_matrix, states):
@@ -18,7 +80,7 @@ class MarkovChain:
          p=self.transition_matrix[self.index_dict[current_state], :]
         )
  
-    def generate_states(self, current_state, no=10):
+    def generate_states(self, current_state, no=50):
         future_states = []
         for i in range(no):
             next_state = self.next_state(current_state)
@@ -41,59 +103,22 @@ def probability(arr) ->float:
 
 '''Markov chain driver'''
 tran_matrix = [
-    [.7, .3],
-    [.2, .8]
+    [.5, 0, .25, .25],
+    [0, .5, .25, .25],
+    [.25, .25, .5, 0],
+    [.25, .25, 0, .5]
 ]
 
-null_tran_matrix = [
-    [0, 1],
-    [1, 0]
-]
 
 #Create a markov chain for every trashcan
-markov_matrix = [[None, None, None, None, None],[None, None, None, None, None],[None, None, None, None, None]]
-for i in range(3):
-    for j in range(5):
-        if(i % 2 == j % 2):
-            markov_matrix[i][j] = MarkovChain(tran_matrix, states=[1, 0])
-        else:
-            markov_matrix[i][j] = MarkovChain(null_tran_matrix, states=[1, 0])
+env = Environment()
+agent = MarkovChain(tran_matrix, states=["up", "down", "left", "right"])
+currState = "right"
 
-#Generate environment
-grid = env.Environment()
-
-#Train the matrix 50 times
-for count in range(100000):
-    for i in range(3):
-        for j in range(5):
-            markov_matrix[i][j].next_state(grid.getGrid()[i][j])
-    grid = env.Environment()
-
-for i in range(3):
-    for j in range(5):
-        print("Index (%d, %d): "%(i, j), end="")
-        states = markov_matrix[i][j].generate_states(grid.getGrid()[i][j])
-        print(states)
-        print("     Probability: %f\n"%probability(states))
-
-
-'''
-#Generate markov chain
-switch_chain = MarkovChain(tran_matrix, states=[0, 1])
-#Generate environment
-g = env.Environment()
-
-#observe first cell 50 times and output the states
-for i in range(10000):
-    print("State " + str(i) + ": " + str(switch_chain.next_state(g.getGrid()[1][0])))
-    #time.sleep(0.005)
-    g = env.Environment()
-
-#generate states
-# From 'switch_chain.generate_states(g.getGrid()[x][y]))' we can get the probability
-#of getting new states, for that we have to get the probability of ones
-stts = switch_chain.generate_states(g.getGrid()[0][0])
-print(stts)
-print("Probability: " + str(probability(stts)))
-'''
-    
+while(not env.isEnd):
+    currState = agent.next_state(currState)
+    print(currState)
+    print("----------------")
+    env.move(currState)
+    env.printMatrix()
+    time.sleep(.25)
