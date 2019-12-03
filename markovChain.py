@@ -2,6 +2,7 @@
 #import env as env
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 def validCoord(row, column) ->bool:
     if(row % 2 == column % 2):
@@ -49,6 +50,10 @@ class Environment:
                 self.state = nxtState
                 return nxtState
         return self.state
+
+    def reset(self):
+        self.state = START
+        self.isEnd = False
 
     def printMatrix(self):
         print("o-o-o-o-o-o")
@@ -111,14 +116,34 @@ tran_matrix = [
 
 
 #Create a markov chain for every trashcan
-env = Environment()
-agent = MarkovChain(tran_matrix, states=["up", "down", "left", "right"])
-currState = "right"
+if __name__ == "__main__":
+    env = Environment()
+    agent = MarkovChain(tran_matrix, states=["up", "down", "left", "right"])
+    t = []
+    s =[]
+    timeTaken = np.array([], dtype=np.float32)
+    switchNum = np.array([], dtype=np.float32)
+    currState = "right"
 
-while(not env.isEnd):
-    currState = agent.next_state(currState)
-    print(currState)
-    print("----------------")
-    env.move(currState)
-    env.printMatrix()
-    time.sleep(.25)
+    for j in range(300):
+        startTime = time.time()
+
+        while(not env.isEnd):
+            currState = agent.next_state(currState)
+            print(currState)
+            print("----------------")
+            env.move(currState)
+            env.printMatrix()
+            time.sleep(.25) 
+        env.reset()       
+        s.append(j + 1)
+        t.append(time.time() - startTime)
+    '''
+    timeTaken = np.append(timeTaken, t)
+    switchNum = np.append(switchNum, s)
+    plt.plot(switchNum, timeTaken)
+    plt.xlabel("Switch number")
+    plt.ylabel("Time taken")
+    plt.title("Markov Chain")
+    plt.show()
+    '''

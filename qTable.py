@@ -1,5 +1,6 @@
 #Q-Tables workspace
 import numpy as np
+import matplotlib.pyplot as plt
 import time 
 
 def validCoord(row, column) ->bool:
@@ -48,6 +49,10 @@ class State:
         self.state = state
         self.isEnd = False
         self.determine = DETERMINISTIC
+        self.startTime = time.time()
+
+    def getTime(self):
+        return self.startTime
 
     def giveReward(self):
         if (self.state == FIND_STATE):
@@ -127,9 +132,12 @@ class Agent:
         self.isEnd = self.State.isEnd
         #learning rate
         self.lr = 0.2
-        self.exp_rate = 0.3
+        self.exp_rate = 0.2
         #exploration rate
-        self.decay_gamma = 0.9
+        self.decay_gamma = 0.7
+        self.count = 1
+        self.t = []
+        self.s = []
 
         # initial Q values
         self.Q_values = {}
@@ -138,6 +146,9 @@ class Agent:
                 self.Q_values[(i, j)] = {}
                 for a in self.actions:
                     self.Q_values[(i, j)][a] = 0  # Q value is a dict of dict
+
+    def getLists(self):
+        return(self.s, self.t)
 
     def chooseAction(self):
     # choose action with most expected value
@@ -172,6 +183,9 @@ class Agent:
         while i < rounds:
             # to the end of game back propagate reward
             if self.State.isEnd:
+                self.t.append(time.time() - self.State.getTime())
+                self.s.append(self.count)
+                self.count += 1
                 # back propagate
                 reward = self.State.giveReward()    #coordinate where switch is located
                 for a in self.actions:
@@ -203,9 +217,18 @@ if __name__ == "__main__":
     print("initial Q-values ... \n")
     print(ag.Q_values)
 
-    ag.play(100)
+    ag.play(300)
+    switchNum = np.array(ag.getLists()[0], dtype=np.float32)
+    timeTaken = np.array(ag.getLists()[1], dtype=np.float32)
+
     print("latest Q-values ... \n")
     for key in ag.Q_values:
         print(key)
         for values in ag.Q_values[key]:
             print("     ", values, ':', ag.Q_values[key][values])
+
+    plt.plot(switchNum, timeTaken)
+    plt.xlabel("Switch number")
+    plt.ylabel("Time taken")
+    plt.title("Q-Learning")
+    plt.show()
