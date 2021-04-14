@@ -16,4 +16,8 @@ We ran the program until the agent guesses the switches correctly 300 times, we 
 
 |               MDP               |                   Q-Learning                   |
 |               ---               |                   ----------                   |
-| ![MDP Results](./markov300.png) | ![Q-Learning Results](./low gamma_low exp.png) |
+| ![MDP Results](./markov300.png) | ![Q-Learning Results](./low_gamma_low_exp.png) |
+
+---
+
+For more information, you can look at the [report](./report.pdf).
